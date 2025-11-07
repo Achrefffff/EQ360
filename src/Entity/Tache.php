@@ -48,7 +48,7 @@ class Tache
     private $valeurAjoutee;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="date", nullable=true)
      */
     private $dateEcheance;
 
@@ -177,12 +177,12 @@ class Tache
         return $this;
     }
 
-    public function getDateEcheance(): ?string
+    public function getDateEcheance(): ?\DateTimeInterface
     {
         return $this->dateEcheance;
     }
 
-    public function setDateEcheance(string $dateEcheance): self
+    public function setDateEcheance(?\DateTimeInterface $dateEcheance): self
     {
         $this->dateEcheance = $dateEcheance;
         return $this;

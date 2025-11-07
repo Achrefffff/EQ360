@@ -39,8 +39,14 @@ class ProjetOutput
     public ?string $pieceJointes = null;
 
     /** @Groups({"projet:read"}) */
+    public ?int $sppaId = null;
+
+    /** @Groups({"projet:read"}) */
     public ?array $sppa = null; // minimal sppa info
 
     /** @Groups({"projet:read"}) */
     public ?array $user = null; // minimal user info
+
+    /** @Groups({"projet:read"}) */
+    public ?array $stats = null; // statistiques du projet
 }

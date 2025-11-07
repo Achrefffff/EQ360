@@ -72,7 +72,7 @@ class Projet
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\SPPA", inversedBy="projets")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=true)
      */
     private $sppa;
 

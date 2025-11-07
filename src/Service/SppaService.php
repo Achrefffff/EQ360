@@ -75,6 +75,10 @@ class SppaService
     {
         if (property_exists($input, 'nom') && $input->nom !== null) $sppa->setNom($input->nom);
         if (property_exists($input, 'description')) $sppa->setDescription($input->description ?? null);
+        if (property_exists($input, 'avatar')) $sppa->setAvatar($input->avatar);
+        if (property_exists($input, 'couleur')) $sppa->setCouleur($input->couleur);
+        if (property_exists($input, 'competences') && is_array($input->competences)) $sppa->setCompetences($input->competences);
+        if (property_exists($input, 'valeurs') && is_array($input->valeurs)) $sppa->setValeurs($input->valeurs);
         $this->em->flush();
         return $this->toOutput($sppa);
     }
@@ -89,8 +93,36 @@ class SppaService
     {
         $out = new SppaOutput();
         $out->id = $s->getId();
-        $out->nom = method_exists($s, 'getNom') ? $s->getNom() : null;
-        $out->description = method_exists($s, 'getDescription') ? $s->getDescription() : null;
+        $out->nom = $s->getNom();
+        $out->description = $s->getDescription();
+        $out->avatar = $s->getAvatar();
+        $out->couleur = $s->getCouleur();
+        $out->competences = $s->getCompetences();
+        $out->valeurs = $s->getValeurs();
+        $out->niveau = $s->getNiveau();
+        $out->heuresAccumulees = $s->getHeuresAccumulees();
+        $out->experienceXp = $s->getExperienceXp();
+        
+        $taches = [];
+        foreach ($s->getTaches() as $tache) {
+            $taches[] = [
+                'id' => $tache->getId(),
+                'nom' => $tache->getNom(),
+                'statut' => $tache->getStatut(),
+            ];
+        }
+        $out->taches = $taches;
+        
+        $projets = [];
+        foreach ($s->getProjets() as $projet) {
+            $projets[] = [
+                'id' => $projet->getId(),
+                'nom' => $projet->getNom(),
+                'statut' => $projet->getStatut(),
+            ];
+        }
+        $out->projets = $projets;
+        
         return $out;
     }
 }

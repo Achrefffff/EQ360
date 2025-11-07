@@ -91,10 +91,14 @@ class ProjetService
         if ($input->budget !== null) $p->setBudget((float)$input->budget);
         if ($input->statut !== null) $p->setStatut($input->statut);
         if ($input->pieceJointes !== null) $p->setPieceJointes($input->pieceJointes);
-        if ($input->sppaId !== null) {
-            $sppa = $this->sppaRepo->find($input->sppaId);
-            if ($sppa instanceof SPPA) {
-                $p->setSppa($sppa);
+        if (property_exists($input, 'sppaId')) {
+            if ($input->sppaId) {
+                $sppa = $this->sppaRepo->find($input->sppaId);
+                if ($sppa instanceof SPPA) {
+                    $p->setSppa($sppa);
+                }
+            } else {
+                $p->setSppa(null);
             }
         }
         if ($user !== null) {
@@ -116,13 +120,70 @@ class ProjetService
         $out->statut = $p->getStatut();
         $out->pieceJointes = $p->getPieceJointes();
         $sppa = $p->getSppa();
+        $out->sppaId = $sppa ? $sppa->getId() : null;
         if ($sppa) {
-            $out->sppa = ['id' => $sppa->getId(), 'nom' => method_exists($sppa, 'getNom') ? $sppa->getNom() : null];
+            $out->sppa = ['id' => $sppa->getId(), 'nom' => $sppa->getNom()];
         }
         $user = $p->getUser();
         if ($user) {
             $out->user = ['id' => $user->getId(), 'email' => $user->getEmail(), 'nom' => $user->getNom()];
         }
+        
+        // Calculer les statistiques du projet
+        $out->stats = $this->calculateProjetStats($p);
+        
         return $out;
+    }
+    
+    private function calculateProjetStats(Projet $p): array
+    {
+        $taches = $p->getTaches();
+        $totalTaches = $taches->count();
+        $tachesTerminees = 0;
+        $xpTotal = 0.0;
+        $heuresTotal = 0.0;
+        
+        if ($totalTaches === 0) {
+            return [
+                'totalTaches' => 0,
+                'tachesTerminees' => 0,
+                'tauxCompletion' => 0,
+                'experienceXp' => 0,
+                'niveau' => 1,
+                'heuresAccumulees' => 0,
+            ];
+        }
+        
+        foreach ($taches as $tache) {
+            if ($tache->getStatut() === 'done') {
+                $tachesTerminees++;
+                $heuresTotal += $tache->getDureeEstimee();
+                
+                // Calculer l'XP de la tâche
+                $xpBase = ($tache->getDifficulte() * 10) 
+                        + ($tache->getDureeEstimee() * 2) 
+                        + ($tache->getEnthousiasme() * 1);
+                
+                // Vérifier si en retard
+                $dateEcheance = $tache->getDateEcheance();
+                if ($dateEcheance && (new \DateTime()) > $dateEcheance) {
+                    $xpBase = $xpBase / 2;
+                }
+                
+                $xpTotal += $xpBase;
+            }
+        }
+        
+        $tauxCompletion = round(($tachesTerminees / $totalTaches) * 100, 2);
+        $niveau = (int) floor($xpTotal / 100) + 1;
+        
+        return [
+            'totalTaches' => $totalTaches,
+            'tachesTerminees' => $tachesTerminees,
+            'tauxCompletion' => $tauxCompletion,
+            'experienceXp' => $xpTotal,
+            'niveau' => $niveau,
+            'heuresAccumulees' => $heuresTotal,
+        ];
     }
 }
