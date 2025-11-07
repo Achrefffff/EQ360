@@ -51,28 +51,25 @@ class GamificationService
     public function checkProjetCompletion(Projet $projet): void
     {
         $taches = $projet->getTaches();
-        
-        // Vérifier si le projet a des tâches
-        if ($taches->isEmpty()) {
-            return;
-        }
-
-        // Vérifier si toutes les tâches sont terminées
         $totalTaches = $taches->count();
-        $tachesTerminees = 0;
         
-        foreach ($taches as $tache) {
-            if ($tache->getStatut() === 'done') {
-                $tachesTerminees++;
+        // Si le projet a des tâches, vérifier qu'elles sont toutes terminées
+        if ($totalTaches > 0) {
+            $tachesTerminees = 0;
+            
+            foreach ($taches as $tache) {
+                if ($tache->getStatut() === 'done') {
+                    $tachesTerminees++;
+                }
+            }
+
+            // Si toutes les tâches ne sont pas terminées, on ne fait rien
+            if ($tachesTerminees !== $totalTaches) {
+                return;
             }
         }
 
-        // Si toutes les tâches ne sont pas terminées, on ne fait rien
-        if ($tachesTerminees !== $totalTaches) {
-            return;
-        }
-
-        // Toutes les tâches sont terminées : changer le statut du projet et donner un BONUS au SPPA
+        // Projet terminé : changer le statut et donner un BONUS au SPPA
         $projet->setStatut('termine');
         
         $sppa = $projet->getSppa();
@@ -101,8 +98,21 @@ class GamificationService
             return;
         }
 
-        // Bonus de 7 niveaux = 700 XP
-        $bonusXp = 700;
+        // Bonus minimum de 500 XP, même sans projets
+        $bonusXp = 500;
+        
+        // Bonus supplémentaire si l'objectif a des projets terminés
+        $projets = $objectif->getProjets();
+        if ($projets && $projets->count() > 0) {
+            $projetsTermines = 0;
+            foreach ($projets as $projet) {
+                if ($projet->getStatut() === 'termine') {
+                    $projetsTermines++;
+                }
+            }
+            // 50 XP bonus par projet terminé
+            $bonusXp += ($projetsTermines * 50);
+        }
 
         // Ajouter le bonus au SPPA
         $nouvelleXp = $sppa->getExperienceXp() + $bonusXp;
