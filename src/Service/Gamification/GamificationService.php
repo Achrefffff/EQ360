@@ -4,6 +4,7 @@ namespace App\Service\Gamification;
 
 use App\Entity\Tache;
 use App\Entity\Projet;
+use App\Entity\Objectif;
 use Doctrine\ORM\EntityManagerInterface;
 
 class GamificationService
@@ -89,6 +90,29 @@ class GamificationService
             $heures = $this->progressionCalculator->calculerHeures($sppa);
             $sppa->setHeuresAccumulees($heures);
         }
+        
+        $this->em->flush();
+    }
+
+    public function onObjectifAtteint(Objectif $objectif): void
+    {
+        $sppa = $objectif->getSppa();
+        if (!$sppa) {
+            return;
+        }
+
+        // Bonus de 7 niveaux = 700 XP
+        $bonusXp = 700;
+
+        // Ajouter le bonus au SPPA
+        $nouvelleXp = $sppa->getExperienceXp() + $bonusXp;
+        $sppa->setExperienceXp($nouvelleXp);
+        
+        $nouveauNiveau = $this->levelCalculator->calculerNiveau($nouvelleXp);
+        $sppa->setNiveau($nouveauNiveau);
+        
+        $heures = $this->progressionCalculator->calculerHeures($sppa);
+        $sppa->setHeuresAccumulees($heures);
         
         $this->em->flush();
     }

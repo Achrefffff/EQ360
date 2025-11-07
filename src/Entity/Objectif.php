@@ -81,14 +81,13 @@ class Objectif
     private $user;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Projet", inversedBy="objectifs")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\OneToMany(targetEntity="App\Entity\Projet", mappedBy="objectif")
      */
-    private $projet;
+    private $projets;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\SPPA", inversedBy="objectifs")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=true)
      */
     private $sppa;
 
@@ -99,6 +98,7 @@ class Objectif
 
     public function __construct()
     {
+        $this->projets = new ArrayCollection();
         $this->taches = new ArrayCollection();
     }
 
@@ -250,14 +250,30 @@ class Objectif
         return $this;
     }
 
-    public function getProjet(): ?Projet
+    /**
+     * @return Collection|Projet[]
+     */
+    public function getProjets(): Collection
     {
-        return $this->projet;
+        return $this->projets;
     }
 
-    public function setProjet(?Projet $projet): self
+    public function addProjet(Projet $projet): self
     {
-        $this->projet = $projet;
+        if (!$this->projets->contains($projet)) {
+            $this->projets[] = $projet;
+            $projet->setObjectif($this);
+        }
+        return $this;
+    }
+
+    public function removeProjet(Projet $projet): self
+    {
+        if ($this->projets->removeElement($projet)) {
+            if ($projet->getObjectif() === $this) {
+                $projet->setObjectif(null);
+            }
+        }
         return $this;
     }
 

@@ -41,4 +41,7 @@ class SppaOutput
 
     /** @Groups({"sppa:read"}) */
     public ?array $projets = null;
+
+    /** @Groups({"sppa:read"}) */
+    public ?array $objectifs = null;
 }

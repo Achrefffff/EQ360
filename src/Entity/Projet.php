@@ -77,9 +77,10 @@ class Projet
     private $sppa;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Objectif", mappedBy="projet", cascade={"persist", "remove"})
+     * @ORM\ManyToOne(targetEntity="App\Entity\Objectif", inversedBy="projets")
+     * @ORM\JoinColumn(nullable=true)
      */
-    private $objectifs;
+    private $objectif;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Tache", mappedBy="projet")
@@ -88,7 +89,6 @@ class Projet
 
     public function __construct()
     {
-        $this->objectifs = new ArrayCollection();
         $this->taches = new ArrayCollection();
     }
 
@@ -218,30 +218,14 @@ class Projet
         return $this;
     }
 
-    /**
-     * @return Collection|Objectif[]
-     */
-    public function getObjectifs(): Collection
+    public function getObjectif(): ?Objectif
     {
-        return $this->objectifs;
+        return $this->objectif;
     }
 
-    public function addObjectif(Objectif $objectif): self
+    public function setObjectif(?Objectif $objectif): self
     {
-        if (!$this->objectifs->contains($objectif)) {
-            $this->objectifs[] = $objectif;
-            $objectif->setProjet($this);
-        }
-        return $this;
-    }
-
-    public function removeObjectif(Objectif $objectif): self
-    {
-        if ($this->objectifs->removeElement($objectif)) {
-            if ($objectif->getProjet() === $this) {
-                $objectif->setProjet(null);
-            }
-        }
+        $this->objectif = $objectif;
         return $this;
     }
 

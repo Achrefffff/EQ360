@@ -123,6 +123,17 @@ class SppaService
         }
         $out->projets = $projets;
         
+        $objectifs = [];
+        foreach ($s->getObjectifs() as $objectif) {
+            $objectifs[] = [
+                'id' => $objectif->getId(),
+                'nom' => $objectif->getNom(),
+                'statut' => $objectif->getStatut(),
+                'progression' => $objectif->getProgression(),
+            ];
+        }
+        $out->objectifs = $objectifs;
+        
         return $out;
     }
 }

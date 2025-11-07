@@ -16,5 +16,32 @@ class ObjectifOutput
     public ?string $description = null;
 
     /** @Groups({"objectif:read"}) */
-    public ?array $projet = null; // minimal project info
+    public ?string $domaineVie = null;
+
+    /** @Groups({"objectif:read"}) */
+    public ?string $horizon = null;
+
+    /** @Groups({"objectif:read"}) */
+    public ?string $priorite = null;
+
+    /** @Groups({"objectif:read"}) */
+    public ?string $statut = null;
+
+    /** @Groups({"objectif:read"}) */
+    public ?string $dateDebut = null;
+
+    /** @Groups({"objectif:read"}) */
+    public ?string $dateFin = null;
+
+    /** @Groups({"objectif:read"}) */
+    public ?float $progression = null;
+
+    /** @Groups({"objectif:read"}) */
+    public ?array $projets = null;
+
+    /** @Groups({"objectif:read"}) */
+    public ?int $sppaId = null;
+
+    /** @Groups({"objectif:read"}) */
+    public ?array $sppa = null;
 }

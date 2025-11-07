@@ -16,12 +16,14 @@ class ProjetService
     private EntityManagerInterface $em;
     private ProjetRepository $repo;
     private SPPARepository $sppaRepo;
+    private ObjectifService $objectifService;
 
-    public function __construct(EntityManagerInterface $em, ProjetRepository $repo, SPPARepository $sppaRepo)
+    public function __construct(EntityManagerInterface $em, ProjetRepository $repo, SPPARepository $sppaRepo, ObjectifService $objectifService)
     {
         $this->em = $em;
         $this->repo = $repo;
         $this->sppaRepo = $sppaRepo;
+        $this->objectifService = $objectifService;
     }
 
     public function list(int $page = 1, int $limit = 20): array
@@ -65,8 +67,15 @@ class ProjetService
 
     public function update(Projet $projet, ProjetInput $input): ProjetOutput
     {
+        $ancienStatut = $projet->getStatut();
         $this->hydrateEntity($projet, $input, $projet->getUser());
         $this->em->flush();
+        
+        // Si le statut a changé, mettre à jour la progression de l'objectif
+        if ($ancienStatut !== $projet->getStatut() && $projet->getObjectif()) {
+            $this->objectifService->updateProgression($projet->getObjectif());
+        }
+        
         return $this->toOutput($projet);
     }
 
