@@ -71,24 +71,24 @@ class GamificationService
             return;
         }
 
-        // Toutes les tâches sont terminées : donner un BONUS au SPPA
+        // Toutes les tâches sont terminées : changer le statut du projet et donner un BONUS au SPPA
+        $projet->setStatut('termine');
+        
         $sppa = $projet->getSppa();
-        if (!$sppa) {
-            return;
+        if ($sppa) {
+            // Calculer le bonus : 100 XP de base + 10 XP par tâche
+            $bonusXp = 100 + ($totalTaches * 10);
+
+            // Ajouter le bonus au SPPA
+            $nouvelleXp = $sppa->getExperienceXp() + $bonusXp;
+            $sppa->setExperienceXp($nouvelleXp);
+            
+            $nouveauNiveau = $this->levelCalculator->calculerNiveau($nouvelleXp);
+            $sppa->setNiveau($nouveauNiveau);
+            
+            $heures = $this->progressionCalculator->calculerHeures($sppa);
+            $sppa->setHeuresAccumulees($heures);
         }
-
-        // Calculer le bonus : 100 XP de base + 10 XP par tâche
-        $bonusXp = 100 + ($totalTaches * 10);
-
-        // Ajouter le bonus au SPPA
-        $nouvelleXp = $sppa->getExperienceXp() + $bonusXp;
-        $sppa->setExperienceXp($nouvelleXp);
-        
-        $nouveauNiveau = $this->levelCalculator->calculerNiveau($nouvelleXp);
-        $sppa->setNiveau($nouveauNiveau);
-        
-        $heures = $this->progressionCalculator->calculerHeures($sppa);
-        $sppa->setHeuresAccumulees($heures);
         
         $this->em->flush();
     }
